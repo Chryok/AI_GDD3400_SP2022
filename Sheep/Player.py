@@ -8,19 +8,18 @@ from pygame.locals import *
 
 class Player(Agent):
 
-    # constructor
-    def __init__(self, position, size, speed, color):
-        super().__init__(position, size, speed, color)
-        self.target = None
-        self.lastTarget = None
+    def __init__(self, position, size, speed, color, image):
+        super().__init__(position, size, speed, color, image)
+        self.turnSpeed = Constants.PLAYER_TURN_SPEED
 
     # update for player
     def update(self, enemies, dt):
+
         # target to first enemy in list for now if we dont have a target already
-        if self.target == None and enemies[0] != None:
+        if self.target == None and enemies:
             self.target = enemies[0]
             # if the target selected is the same as our last target move on to next target
-            if self.target == self.lastTarget and enemies[1] != None:
+            if self.target == self.lastTarget and len(enemies) > 1:
                 self.target = enemies[1]
             # go through the list and select the closest enemy as long as it was not the previously targeted enemy
             for e in enemies:
@@ -29,17 +28,14 @@ class Player(Agent):
 
         # chase target
         if self.target != None:
-            # set velocity towards target and then go that way
-            self.velocity = ((self.target.center - self.center).normalize()).scale(self.speed)
+            # store the calculated, normalized direction to the Sheep being tracked
+            self.targetDir = (self.target.center - self.center).normalize()
 
-            # set engaged and engager, this is for drawing the red lines for debugging
-            self.engaged = True
-            self.engager = self.target
+            # calculate applied force based on weights
+            self.allForces.append(self.targetDir.scale(Constants.DIR_TO_ENEMY_WEIGHT))
             
             # use parent method
-            super().update(enemies, dt)
+            super().update(dt)
 
-            # if we tag the target set last target = target and target = none.
-            if self.collision(self.target):
-                self.lastTarget = self.target
-                self.target = None
+        else:
+            self.velocity = Vector(0,0)
