@@ -11,6 +11,7 @@ class Player(Agent):
     def __init__(self, position, size, speed, color, image):
         super().__init__(position, size, speed, color, image)
         self.turnSpeed = Constants.PLAYER_TURN_SPEED
+        
 
     # update for player
     def update(self, enemies, dt):

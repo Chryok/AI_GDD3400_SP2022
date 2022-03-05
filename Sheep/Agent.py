@@ -47,7 +47,8 @@ class Agent:
         #pygame.draw.rect(display, self.color, self.agentRect)
 
         # draw bounding rect
-        pygame.draw.rect(display, self.color, self.boundingRect, 1)
+        if Constants.DEBUG_BOUNDING_RECTS:
+            pygame.draw.rect(display, self.color, self.boundingRect, Constants.DEBUG_LINE_WIDTH)
 
         # draw debug lines
         self.drawDebugLines(display)
@@ -142,7 +143,7 @@ class Agent:
     # calculates and appends boundary force to boundaryForces
     def addBoundaryForce(self, boundaryNormalVector, boundaryDist):
         if boundaryDist < Constants.BOUNDARY_RADIUS:
-            self.boundaryForces.append((boundaryNormalVector.scale((Constants.BOUNDARY_RADIUS - boundaryDist)/(Constants.BOUNDARY_RADIUS/1.5))).scale(Constants.BOUNDARY_WEIGHT))
+            self.boundaryForces.append((boundaryNormalVector.scale((Constants.BOUNDARY_RADIUS - boundaryDist))).scale(Constants.BOUNDARY_WEIGHT * int(Constants.ENABLE_BOUNDARIES)))
             self.boundariesNearMe.append(boundaryNormalVector)
 
     # updates all boundary forces
@@ -175,12 +176,16 @@ class Agent:
 
     # draw debug lines
     def drawDebugLines(self, display):
-        # target direction vector
-        pygame.draw.line(display, Constants.COLOR_BLUE, (self.center.x, self.center.y),(self.center.x + self.velocity.x * self.size.x * 2, self.center.y + self.velocity.y * self.size.y * 2), width = 3)
-        
-        # draw vector for where you WANT to go
-        pygame.draw.line(display, Constants.COLOR_GREEN, (self.center.x, self.center.y),(self.center.x + self.allForcesTargetDirection.x * self.size.x * 2, self.center.y + self.allForcesTargetDirection.y * self.size.y * 2), width = 3)
+        if Constants.DEBUG_VELOCITY:
+            # target velocity vector
+            pygame.draw.line(display, Constants.COLOR_GREEN, (self.center.x, self.center.y),(self.center.x + self.allForcesTargetDirection.x * self.size.x * 4, self.center.y + self.allForcesTargetDirection.y * self.size.y * 2), width = 3)
 
-        # boundary force vectors
-        for f in self.boundariesNearMe:
-            self.drawBoundaryVector(display, f, Constants.BOUNDARY_RADIUS)
+        # This is the velocity vector itself, not the target velocity, this will always be a straight line coming straight out from the agent
+        #pygame.draw.line(display, Constants.COLOR_BLUE, (self.center.x, self.center.y),
+        #                 (self.center.x + self.velocity.x * self.size.x * 2,
+        #                  self.center.y + self.velocity.y * self.size.y * 2), Constants.DEBUG_LINE_WIDTH)
+        
+        if Constants.DEBUG_BOUNDARIES:
+            # boundary force vectors
+            for f in self.boundariesNearMe:
+                self.drawBoundaryVector(display, f, Constants.BOUNDARY_RADIUS)
